@@ -1,9 +1,7 @@
-# Leftover images the page no longer uses (from the removed burnout hero and early drafts)
+# Images the page doesn't use (drafts, the removed burnout hero, the GIF version of the door)
 images/hero-rear.jpg
-images/hero-front.jpg
 images/hellcat-front.jpg
 images/hellcat-rear.jpg
 images/banner-maps.jpg
-
-# Source GIF for the door frames (frames are in images/door-frames)
+images/door-frames/
 images/*.gif

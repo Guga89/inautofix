@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#050a1c">
 <link rel="icon" href="images/logo-512.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-<link rel="preload" as="image" href="images/door-frames/f00.jpg">
+<link rel="preload" as="image" href="images/hero-front.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -122,7 +122,40 @@
     overflow: hidden; isolation: isolate; background: radial-gradient(ellipse 80% 60% at 50% 100%, #0a1433, #02040c 70%);
   }
   /* garage version: door-opening animation frames drawn on a canvas */
-  #door-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; display: block; }
+  /* shop ceiling lights that switch on once the door is up */
+  .scene .ceiling { position: absolute; inset: 0 0 auto; height: 40%; z-index: 1; pointer-events: none; opacity: var(--ceil, 0);
+    background:
+      linear-gradient(90deg, transparent 0 10%, #fff 10% 24%, transparent 24% 43%, #fff 43% 57%, transparent 57% 76%, #fff 76% 90%, transparent 90%) top 18px left 0 / 100% 3px no-repeat,
+      radial-gradient(ellipse 60% 70% at 50% 0%, rgba(210,225,255,.16), transparent 70%); }
+
+  /* the owner's Hellcat (front photo) */
+  .stage { position: absolute; z-index: 2; left: 50%; bottom: 0; height: 88%; aspect-ratio: 1500 / 1060; transform-origin: 50% 100%; will-change: transform; }
+  .stage img.car { width: 100%; height: 100%; display: block; filter: brightness(var(--lit, 1)) contrast(1.04);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%), linear-gradient(180deg, transparent 0, #000 16%, #000 92%, transparent 100%);
+    -webkit-mask-composite: source-in;
+            mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%), linear-gradient(180deg, transparent 0, #000 16%, #000 92%, transparent 100%);
+            mask-composite: intersect; }
+  /* headlight glows on top of the photo (positions are % of the photo) */
+  .glow { position: absolute; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; opacity: 0; transform: translate(-50%, -50%); }
+  .glow.head { width: 34%; aspect-ratio: 2.4; background: radial-gradient(closest-side, rgba(235,245,255,.95), rgba(150,190,255,.45) 40%, transparent 100%); }
+  .glow.drl { width: 14%; aspect-ratio: .7; background: radial-gradient(closest-side, rgba(235,245,255,.9), rgba(150,190,255,.35) 45%, transparent 100%); }
+  .glow.beam { width: 90%; aspect-ratio: 3; background: radial-gradient(closest-side, rgba(200,220,255,.28), transparent 100%); }
+
+  /* roll-up shop door with the logo */
+  .door { position: absolute; inset: 0; z-index: 3; will-change: transform; pointer-events: none;
+    background:
+      radial-gradient(ellipse 50% 70% at 18% 0%, rgba(255,255,255,.10), transparent 70%),
+      linear-gradient(180deg, rgba(0,0,0,.0) 60%, rgba(0,0,0,.45)),
+      repeating-linear-gradient(180deg, #2c3446 0, #232a3a 7px, #1a2030 22px, #0c0f18 26px, #3a4458 27px, #2c3446 28px);
+    box-shadow: 0 12px 30px rgba(0,0,0,.8); }
+  .door::after { /* bottom rail */ content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 22px;
+    background: linear-gradient(180deg, #5b616e, #2b2e36 60%, #111); border-top: 2px solid #6b7180; }
+  .door .door-badge { position: absolute; right: max(4vw, calc((100vw - 1160px) / 2 + 20px)); top: 50%; transform: translateY(-55%);
+    width: min(42vh, 30vw); aspect-ratio: 1; border-radius: 50%; overflow: hidden;
+    box-shadow: 0 0 0 6px rgba(0,0,0,.35), 0 20px 60px rgba(0,0,0,.6); opacity: .95; }
+  .door .door-badge img { width: 100%; height: 100%; }
+  .door .handle { position: absolute; bottom: 34px; left: 50%; width: 90px; height: 12px; margin-left: -45px; border-radius: 6px; background: linear-gradient(180deg, #8a909c, #3c4049); box-shadow: 0 2px 4px rgba(0,0,0,.6); }
+  .door-head { position: absolute; inset: 0 0 auto; height: 16px; z-index: 4; background: linear-gradient(180deg, #23262e, #0e0f13); border-bottom: 3px solid var(--red); }
 
 
   /* dark fade behind the hero text so it stays readable over the car */
@@ -294,6 +327,10 @@
     .scene { height: calc(100vh - var(--head-h) - 70px); height: calc(100svh - var(--head-h) - 70px); }
     /* on phones the car is sized by width and may run off the sides */
     .hero-copy, .cap { top: 5%; }
+    /* the sticky Call / Book bar is already at the bottom, so the hero doesn't repeat those buttons */
+    .hero-copy .cta-row, .cap.final .btn { display: none; }
+    .stage { height: auto; width: 165vw; bottom: 4%; }
+    .door .door-badge { right: 50%; top: auto; bottom: 9%; transform: translateX(50%); width: min(52vw, 30vh); }
     .scrim { background: linear-gradient(180deg, rgba(2,5,15,.92) 0, rgba(2,5,15,.6) 42%, rgba(2,5,15,0) 68%); }
     .hero-copy h1 { font-size: clamp(2rem, 9.5vw, 2.6rem); }
     .hero-copy p.sub { font-size: 1rem; }
@@ -330,7 +367,7 @@
     html { scroll-behavior: auto; }
     #hero { height: auto; }
     .scene { position: relative; top: 0; height: calc(100vh - var(--head-h)); min-height: 560px; }
-    .scroll-hint, .cap.mid { display: none; }
+    .door, .door-head, .scroll-hint, .cap.mid { display: none; }
   }
 </style>
 </head>
@@ -360,8 +397,19 @@
   <!-- ===== Hero scroll scene ===== -->
   <section id="hero" aria-label="IN Auto Fix">
     <div class="scene" id="scene">
-      <!-- Shop door rolls up, headlights come on (30 frames from the Gemini GIF) -->
-      <canvas id="door-canvas" width="1920" height="1080" role="img" aria-label="The IN Auto Fix garage door rolls up to show the owner's white Dodge Charger Hellcat with its headlights switching on"></canvas>
+      <div class="ceiling"></div>
+      <!-- the owner's Hellcat behind a roll-up shop door -->
+      <div class="stage" id="stage">
+        <img class="car" src="images/hero-front.jpg" alt="The owner's white Dodge Charger Hellcat with black stripes, headlights on" width="1500" height="1060">
+        <div class="glow beam" style="left:62%; top:66%"></div>
+        <div class="glow head" style="left:52.6%; top:56.6%"></div>
+        <div class="glow drl" style="left:92.4%; top:47.5%"></div>
+      </div>
+      <div class="door" id="door">
+        <div class="door-badge"><img src="images/logo-512.png" alt="" width="512" height="512"></div>
+        <div class="handle"></div>
+      </div>
+      <div class="door-head"></div>
       <div class="scrim" id="scrim"></div>
 
       <!-- Text -->
@@ -654,7 +702,7 @@
   const CONFIG = {
     phone: "+16138794332",
     phoneDisplay: "(613) 879-4332",
-    email: "",          // shop email. Empty = hidden, and the form sends a text message instead
+    email: "inautofix@outlook.com",   // shop email. Empty = hidden, and the form sends a text message instead
     address: "4020 Leitrim Rd, Lot 18, Ottawa, ON K1G 3N4",
     mapsQuery: "IN Auto Fix, 4020 Leitrim Rd, Ottawa, ON K1G 3N4",
     // Opening hours, Sunday first (matches the JavaScript day number)
@@ -700,64 +748,13 @@
   /* ===== Hero scroll scene ===== */
   const scene = $("#scene"), section = $("#hero"), copy = $("#hero-copy"), hint = $("#scroll-hint");
   const capG1 = $("#cap-g1"), capFinal = $("#cap-final"), scrim = $("#scrim");
+  const stage = $("#stage"), door = $("#door"), glows = stage.querySelectorAll(".glow");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const ease = (t) => t * t * (3 - 2 * t);
   const range = (p, a, b) => ease(clamp((p - a) / (b - a)));
   const show = (el, a) => { el.style.opacity = a; el.style.transform = `translateY(${16 * (1 - a)}px)`; el.classList.toggle("show", a > .5); };
-
-  /* --- garage door frames --- */
-  // images/door-frames/f00.jpg - f29.jpg (upscaled from the Gemini GIF)
-  const DOOR_DIR = "images/door-frames", DOOR_COUNT = 30;
-  const dCanvas = $("#door-canvas"), dctx = dCanvas.getContext("2d");
-  const doorFrames = [];
-  let doorPos = 0, doorShift = 0, doorDrawn = "";
-  const ready = (img) => img && img.complete && img.naturalWidth;
-  function loadDoor(i) {
-    const img = new Image();
-    img.decoding = "async";
-    img.src = `${DOOR_DIR}/f${String(i).padStart(2, "0")}.jpg`;
-    img.onload = () => { doorDrawn = ""; drawDoor(doorPos); };
-    doorFrames[i] = img;
-  }
-  function sizeDoor() {
-    const r = Math.min(devicePixelRatio || 1, 2);
-    dCanvas.width = Math.round(scene.clientWidth * r);
-    dCanvas.height = Math.round(scene.clientHeight * r);
-    doorDrawn = "";
-  }
-  function drawDoor(pos) {
-    doorPos = pos;
-    const key = pos.toFixed(2) + "|" + doorShift.toFixed(3) + "|" + dCanvas.width;
-    if (key === doorDrawn) return;
-    let i = Math.floor(pos), t = pos - i;
-    while (i > 0 && !ready(doorFrames[i])) { i--; t = 0; }   // use the nearest loaded frame while the rest download
-    if (!ready(doorFrames[i])) return;
-    doorDrawn = key;
-    const W = dCanvas.width, H = dCanvas.height, mobile = innerWidth <= 760;
-    // desktop: fill the screen. phone: keep the whole car in view, anchored to the bottom
-    const sc = mobile ? Math.max(W * 1.6 / 1920, H * .5 / 1080) : Math.max(W / 1920, H / 1080);
-    const fw = 1920 * sc, fh = 1080 * sc;
-    const x = (W - fw) / 2 + doorShift * W, y = mobile ? H - fh : (H - fh) / 2;
-    dctx.fillStyle = "#06080c";
-    dctx.fillRect(0, 0, W, H);
-    dctx.globalAlpha = 1;
-    dctx.drawImage(doorFrames[i], x, y, fw, fh);
-    if (t > .01 && ready(doorFrames[i + 1])) {
-      dctx.globalAlpha = t;   // blend into the next frame so scrolling looks smooth
-      dctx.drawImage(doorFrames[i + 1], x, y, fw, fh);
-      dctx.globalAlpha = 1;
-    }
-    if (mobile) {   // fade the top of the frame into the background
-      const g = dctx.createLinearGradient(0, y, 0, y + fh * .35);
-      g.addColorStop(0, "#06080c"); g.addColorStop(1, "rgba(6,8,12,0)");
-      dctx.fillStyle = g; dctx.fillRect(0, y, W, fh * .35);
-    }
-  }
-  loadDoor(reduced ? DOOR_COUNT - 1 : 0);
-  if (!reduced) addEventListener("load", () => { for (let i = 1; i < DOOR_COUNT; i++) loadDoor(i); });
-  sizeDoor();
 
   function render(p) {
     const w = innerWidth, mobile = w <= 760;
@@ -768,14 +765,22 @@
     copy.style.pointerEvents = out > .5 ? "none" : "";
     hint.style.opacity = 1 - range(p, 0, .05);
 
-    // 1. frames play as you scroll: door rolls up, headlights come on.
-    //    While the intro text is showing, the door sits to the right so the logo isn't behind the text.
-    doorShift = mobile ? 0 : (1 - range(p, .03, .16)) * .2;
-    drawDoor(clamp((p - .08) / .6) * (DOOR_COUNT - 1));
-    // 2. text
-    show(capG1, range(p, .22, .28) * (1 - range(p, .42, .48)));
+    // 1. door rolls up, camera eases back a little
+    door.style.transform = `translateY(${-101 * range(p, .08, .5)}%)`;
+    const zoom = 1.08 - .08 * range(p, .1, .6);
+    const focal = mobile ? 62 : 50;   // on phones, centre on the front of the car
+    const fin = range(p, .66, .78);
+    stage.style.transform = `translateX(-${focal}%) scale(${zoom * (1 - .08 * fin)})`;
+    // 2. headlights flicker on, then the shop lights
+    const l = range(p, .5, .58);
+    const flick = l <= 0 ? 0 : l >= .8 ? 1 : (Math.sin(l * 60) > .2 ? l : .05);
+    glows.forEach(g => g.style.opacity = flick);
+    stage.style.setProperty("--lit", (.32 + .68 * range(p, .56, .68)).toFixed(3));
+    scene.style.setProperty("--ceil", range(p, .58, .66));
+    // 3. text
+    show(capG1, range(p, .2, .26) * (1 - range(p, .44, .5)));
     show(capFinal, range(p, .68, .76));
-    scrim.style.opacity = Math.max(1 - out, range(p, .22, .28) * (1 - range(p, .42, .48)), range(p, .66, .74)).toFixed(3);
+    scrim.style.opacity = Math.max(1 - out, range(p, .2, .26) * (1 - range(p, .44, .5)), range(p, .66, .74)).toFixed(3);
   }
 
   function progress() {
@@ -790,7 +795,7 @@
     ticking = true;
     requestAnimationFrame(() => { ticking = false; render(progress()); });
   }
-  addEventListener("resize", () => { sizeDoor(); onScroll(); });
+  addEventListener("resize", onScroll);
   render(progress());
   if (!reduced) addEventListener("scroll", onScroll, { passive: true });
 
