@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#050a1c">
 <link rel="icon" href="images/logo-512.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-<link rel="preload" as="image" href="images/hero-front.jpg">
+<link rel="preload" as="image" href="images/car-frames/c0-dark.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -121,25 +121,8 @@
     position: sticky; top: var(--head-h); height: calc(100vh - var(--head-h)); height: calc(100svh - var(--head-h));
     overflow: hidden; isolation: isolate; background: radial-gradient(ellipse 80% 60% at 50% 100%, #0a1433, #02040c 70%);
   }
-  /* garage version: door-opening animation frames drawn on a canvas */
-  /* shop ceiling lights that switch on once the door is up */
-  .scene .ceiling { position: absolute; inset: 0 0 auto; height: 40%; z-index: 1; pointer-events: none; opacity: var(--ceil, 0);
-    background:
-      linear-gradient(90deg, transparent 0 10%, #fff 10% 24%, transparent 24% 43%, #fff 43% 57%, transparent 57% 76%, #fff 76% 90%, transparent 90%) top 18px left 0 / 100% 3px no-repeat,
-      radial-gradient(ellipse 60% 70% at 50% 0%, rgba(210,225,255,.16), transparent 70%); }
-
-  /* the owner's Hellcat (front photo) */
-  .stage { position: absolute; z-index: 2; left: 50%; bottom: 0; height: 88%; aspect-ratio: 1500 / 1060; transform-origin: 50% 100%; will-change: transform; }
-  .stage img.car { width: 100%; height: 100%; display: block; filter: brightness(var(--lit, 1)) contrast(1.04);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%), linear-gradient(180deg, transparent 0, #000 16%, #000 92%, transparent 100%);
-    -webkit-mask-composite: source-in;
-            mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%), linear-gradient(180deg, transparent 0, #000 16%, #000 92%, transparent 100%);
-            mask-composite: intersect; }
-  /* headlight glows on top of the photo (positions are % of the photo) */
-  .glow { position: absolute; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; opacity: 0; transform: translate(-50%, -50%); }
-  .glow.head { width: 34%; aspect-ratio: 2.4; background: radial-gradient(closest-side, rgba(235,245,255,.95), rgba(150,190,255,.45) 40%, transparent 100%); }
-  .glow.drl { width: 14%; aspect-ratio: .7; background: radial-gradient(closest-side, rgba(235,245,255,.9), rgba(150,190,255,.35) 45%, transparent 100%); }
-  .glow.beam { width: 90%; aspect-ratio: 3; background: radial-gradient(closest-side, rgba(200,220,255,.28), transparent 100%); }
+  /* the car behind the door: last frames of the owner's GIF, drawn on a canvas */
+  #car-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; display: block; }
 
   /* roll-up shop door with the logo */
   .door { position: absolute; inset: 0; z-index: 3; will-change: transform; pointer-events: none;
@@ -329,8 +312,8 @@
     .hero-copy, .cap { top: 5%; }
     /* the sticky Call / Book bar is already at the bottom, so the hero doesn't repeat those buttons */
     .hero-copy .cta-row, .cap.final .btn { display: none; }
-    .stage { height: auto; width: 165vw; bottom: 4%; }
-    .door .door-badge { right: 50%; top: auto; bottom: 9%; transform: translateX(50%); width: min(52vw, 30vh); }
+    /* logo sits halfway between the end of the hero text and the door handle (set by script) */
+    .door .door-badge { right: 50%; top: var(--badge-y, 60%); transform: translate(50%, -50%); width: var(--badge-w, min(52vw, 30vh)); }
     .scrim { background: linear-gradient(180deg, rgba(2,5,15,.92) 0, rgba(2,5,15,.6) 42%, rgba(2,5,15,0) 68%); }
     .hero-copy h1 { font-size: clamp(2rem, 9.5vw, 2.6rem); }
     .hero-copy p.sub { font-size: 1rem; }
@@ -397,14 +380,8 @@
   <!-- ===== Hero scroll scene ===== -->
   <section id="hero" aria-label="IN Auto Fix">
     <div class="scene" id="scene">
-      <div class="ceiling"></div>
-      <!-- the owner's Hellcat behind a roll-up shop door -->
-      <div class="stage" id="stage">
-        <img class="car" src="images/hero-front.jpg" alt="The owner's white Dodge Charger Hellcat with black stripes, headlights on" width="1500" height="1060">
-        <div class="glow beam" style="left:62%; top:66%"></div>
-        <div class="glow head" style="left:52.6%; top:56.6%"></div>
-        <div class="glow drl" style="left:92.4%; top:47.5%"></div>
-      </div>
+      <!-- the owner's Hellcat behind a roll-up shop door (car frames from his GIF) -->
+      <canvas id="car-canvas" width="1920" height="1080" role="img" aria-label="The owner's white Dodge Charger Hellcat in the garage, headlights switching on"></canvas>
       <div class="door" id="door">
         <div class="door-badge"><img src="images/logo-512.png" alt="" width="512" height="512"></div>
         <div class="handle"></div>
@@ -748,13 +725,68 @@
   /* ===== Hero scroll scene ===== */
   const scene = $("#scene"), section = $("#hero"), copy = $("#hero-copy"), hint = $("#scroll-hint");
   const capG1 = $("#cap-g1"), capFinal = $("#cap-final"), scrim = $("#scrim");
-  const stage = $("#stage"), door = $("#door"), glows = stage.querySelectorAll(".glow");
+  const door = $("#door"), badge = door.querySelector(".door-badge"), handle = door.querySelector(".handle");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const ease = (t) => t * t * (3 - 2 * t);
   const range = (p, a, b) => ease(clamp((p - a) / (b - a)));
   const show = (el, a) => { el.style.opacity = a; el.style.transform = `translateY(${16 * (1 - a)}px)`; el.classList.toggle("show", a > .5); };
+
+  /* --- car frames behind the door --- */
+  // c0-dark.jpg = frame 26 of the GIF with the headlights switched off, c1-c4 = GIF frames 26-29
+  const CAR_DIR = "images/car-frames", CAR_LIT = 4;
+  const canvas = $("#car-canvas"), ctx = canvas.getContext("2d");
+  const ready = (img) => img && img.complete && img.naturalWidth;
+  const loadImg = (name) => { const img = new Image(); img.decoding = "async"; img.src = `${CAR_DIR}/${name}.jpg`; img.onload = () => { drawn = ""; onScroll(); }; return img; };
+  const darkFrame = loadImg("c0-dark");
+  const litFrames = [];
+  addEventListener("load", () => { for (let i = 1; i <= CAR_LIT; i++) litFrames[i - 1] = loadImg("c" + i); });
+  let drawn = "";
+  function sizeCanvas() {
+    const r = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(scene.clientWidth * r);
+    canvas.height = Math.round(scene.clientHeight * r);
+    drawn = "";
+  }
+  // lights: 0 = off, 1 = on. pos: 0..3 through the lit frames. zoom: slow camera pull-back
+  function drawCar(lights, pos, zoom) {
+    const key = [lights.toFixed(3), pos.toFixed(2), zoom.toFixed(3), canvas.width, canvas.height].join("|");
+    if (key === drawn || !ready(darkFrame)) return;
+    drawn = key;
+    const W = canvas.width, H = canvas.height, mobile = innerWidth <= 760;
+    // desktop: fill the screen. phone: keep the whole car in view, anchored to the bottom
+    const sc = (mobile ? Math.max(W * 2 / 1920, H * .5 / 1080) : Math.max(W / 1920, H / 1080)) * zoom;
+    const fw = 1920 * sc, fh = 1080 * sc, x = (W - fw) / 2, y = mobile ? H - fh : (H - fh) / 2;
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#06080c";
+    ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(darkFrame, x, y, fw, fh);
+    if (lights > 0) {
+      let i = Math.floor(pos), t = pos - i;
+      while (i > 0 && !ready(litFrames[i])) { i--; t = 0; }
+      if (ready(litFrames[i])) {
+        ctx.globalAlpha = lights;
+        ctx.drawImage(litFrames[i], x, y, fw, fh);
+        if (t > .01 && ready(litFrames[i + 1])) { ctx.globalAlpha = lights * t; ctx.drawImage(litFrames[i + 1], x, y, fw, fh); }
+        ctx.globalAlpha = 1;
+      }
+    }
+    if (mobile) {   // fade the top of the frame into the background
+      const g = ctx.createLinearGradient(0, y, 0, y + fh * .35);
+      g.addColorStop(0, "#06080c"); g.addColorStop(1, "rgba(6,8,12,0)");
+      ctx.fillStyle = g; ctx.fillRect(0, y, W, fh * .35);
+    }
+  }
+
+  // phones: put the door logo halfway between the end of the hero text and the door handle
+  function placeBadge() {
+    if (innerWidth > 760) { door.style.removeProperty("--badge-y"); door.style.removeProperty("--badge-w"); return; }
+    const textEnd = copy.offsetTop + copy.offsetHeight;
+    const gap = handle.offsetTop - textEnd;
+    door.style.setProperty("--badge-y", Math.round(textEnd + gap / 2) + "px");
+    door.style.setProperty("--badge-w", Math.round(Math.max(120, Math.min(innerWidth * .62, gap * .8))) + "px");
+  }
 
   function render(p) {
     const w = innerWidth, mobile = w <= 760;
@@ -765,18 +797,12 @@
     copy.style.pointerEvents = out > .5 ? "none" : "";
     hint.style.opacity = 1 - range(p, 0, .05);
 
-    // 1. door rolls up, camera eases back a little
+    // 1. door rolls up over the dark car
     door.style.transform = `translateY(${-101 * range(p, .08, .5)}%)`;
-    const zoom = 1.08 - .08 * range(p, .1, .6);
-    const focal = mobile ? 62 : 50;   // on phones, centre on the front of the car
-    const fin = range(p, .66, .78);
-    stage.style.transform = `translateX(-${focal}%) scale(${zoom * (1 - .08 * fin)})`;
-    // 2. headlights flicker on, then the shop lights
+    // 2. headlights flicker on, then the last GIF frames play out
     const l = range(p, .5, .58);
-    const flick = l <= 0 ? 0 : l >= .8 ? 1 : (Math.sin(l * 60) > .2 ? l : .05);
-    glows.forEach(g => g.style.opacity = flick);
-    stage.style.setProperty("--lit", (.32 + .68 * range(p, .56, .68)).toFixed(3));
-    scene.style.setProperty("--ceil", range(p, .58, .66));
+    const lights = l <= 0 ? 0 : l >= .8 ? 1 : (Math.sin(l * 60) > .2 ? l : .05);
+    drawCar(lights, range(p, .58, .78) * (CAR_LIT - 1), 1.06 - .06 * range(p, .1, .6));
     // 3. text
     show(capG1, range(p, .2, .26) * (1 - range(p, .44, .5)));
     show(capFinal, range(p, .68, .76));
@@ -795,7 +821,10 @@
     ticking = true;
     requestAnimationFrame(() => { ticking = false; render(progress()); });
   }
-  addEventListener("resize", onScroll);
+  addEventListener("resize", () => { sizeCanvas(); placeBadge(); onScroll(); });
+  sizeCanvas();
+  placeBadge();
+  if (document.fonts) document.fonts.ready.then(placeBadge);   // text height changes once the font loads
   render(progress());
   if (!reduced) addEventListener("scroll", onScroll, { passive: true });
 
